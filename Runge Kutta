@@ -1,0 +1,48 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+double Min(double a, double b) {
+    if (a < b) return a;
+    return b;
+}
+
+double RK4Step(double f(double, double), double x, double y, double h) {
+    std::vector<double> K(4);
+    K.at(0) = f(x, y);
+    K.at(1) = f(x + h/2, y + h * K.at(0) / 2);
+    K.at(2) = f(x + h/2, y + h * K.at(1) / 2);
+    K.at(3) = f(x + h/2, y + h * K.at(2));
+    return y + h * (K.at(0) + 2*K.at(1) + 2*K.at(2) + K.at(3)) / 6;
+}
+
+double AdaptacijaKoraka(double f(double, double), double x_0, double y_0, double x_max, double h) {
+    double x = x_0, y = y_0;
+    double eps = 1e-5;
+    while(x <= x_max) {
+        double u = RK4Step(f, x, y, h/2);
+        double v = RK4Step(f, x + h/2, u, h/2);
+        double w = RK4Step(f, x, y, h);
+        double delta = std::fabs(w - v) / std::fabs(h);
+        if(delta <= eps) {
+            x = x + h;
+            y = v;
+        }
+        h = h * Min(5, std::pow(0.9*(eps/delta),0.25)); 
+    }
+    return y;
+}
+
+int main () {
+    double h;
+    std::cout << "Unesite korak integracije: ";
+    std::cin >> h;
+    double x_max;
+    std::cout << "Unesite vrijednost tacke u kojoj se racuna: ";
+    std::cin >> x_max;
+    double x_0, y_0;
+    std::cout << "Unesite pocetne uslove (prvo x_0, zatim y_0): ";
+    std::cin >> x_0 >> y_0;
+    std::cout << "Rjesenje dif. jednacine prvog reda u tacki " << x_max << " je: " << AdaptacijaKoraka([](double x, double y){ return (y*y-x*x)/(y*y+x*x); }, x_0, y_0, x_max, h);
+    return 0;
+}
