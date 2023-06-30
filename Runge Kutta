@@ -66,6 +66,10 @@ double RungeKutta(double f(double, double, std::vector<double>), double x_0, std
 }
 double RungeKuttaStep(double f(double, double, std::vector<double>), double x, double y, std::vector<double> &u, std::vector<std::vector<double>>& K, double h) {
     for (int k = 0; k < K[0].size() - 1; k++) {
+        K[0][k] = u[k];
+    }
+    K[0][K[0].size() - 1] = f(x, y, u);
+    for (int k = 0; k < K[0].size() - 1; k++) {
         K[1][k] = u[k] + K[0][k + 1] * h / 2.;
     }
     K[1][K[0].size() - 1] = f(x + h / 2, y + h * K[0][0] / 2, K[1]);
@@ -94,7 +98,7 @@ double RungeKuttaAdaptivni(double f(double, double, std::vector<double>), double
     while (x <= x_max) {
         auto u1 = u;
         double w = RungeKuttaStep(f, x, y, u, K, h); u = u1;
-        std::cout << w << std::endl;
+        //std::cout << w << std::endl;
         double v = RungeKuttaStep(f, x, y, u, K, h/2);
         double z = RungeKuttaStep(f, x + h / 2, v, u, K, h / 2);
         double delta = std::fabs(w - z) / std::fabs(h);
@@ -104,6 +108,8 @@ double RungeKuttaAdaptivni(double f(double, double, std::vector<double>), double
         }
         else { u = u1; }
         h = h * Min(5, std::pow(0.9 * (eps / delta), 0.25));
+        //y = RungeKuttaStep(f, x, y, u, K, h);
+        //x += h;
     }
     return y;
 }
