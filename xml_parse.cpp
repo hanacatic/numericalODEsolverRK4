@@ -85,7 +85,7 @@ int main()
     xml_node tools_2 = doc.child("RungeKutta").child("Tacka_za_racunanje");
     double x_max;
 
-    //Za citanje diferencijalne jednacine
+    //Za citanje tacke u kojoj se racuna
     for (xml_node_iterator it = tools_2.begin(); it != tools_2.end(); ++it) {
         cout << "x_max: ";
 
