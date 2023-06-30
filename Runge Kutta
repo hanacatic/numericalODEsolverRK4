@@ -10,39 +10,115 @@ double Min(double a, double b) {
 double RK4Step(double f(double, double), double x, double y, double h) {
     std::vector<double> K(4);
     K.at(0) = f(x, y);
-    K.at(1) = f(x + h/2, y + h * K.at(0) / 2);
-    K.at(2) = f(x + h/2, y + h * K.at(1) / 2);
-    K.at(3) = f(x + h/2, y + h * K.at(2));
-    return y + h * (K.at(0) + 2*K.at(1) + 2*K.at(2) + K.at(3)) / 6;
+    K.at(1) = f(x + h / 2, y + h * K.at(0) / 2);
+    K.at(2) = f(x + h / 2, y + h * K.at(1) / 2);
+    K.at(3) = f(x + h / 2, y + h * K.at(2));
+    return y + h * (K.at(0) + 2 * K.at(1) + 2 * K.at(2) + K.at(3)) / 6;
 }
 
 double AdaptacijaKoraka(double f(double, double), double x_0, double y_0, double x_max, double h) {
     double x = x_0, y = y_0;
     double eps = 1e-5;
-    while(x <= x_max) {
-        double u = RK4Step(f, x, y, h/2);
-        double v = RK4Step(f, x + h/2, u, h/2);
+    while (x <= x_max) {
+        double u = RK4Step(f, x, y, h / 2);
+        double v = RK4Step(f, x + h / 2, u, h / 2);
         double w = RK4Step(f, x, y, h);
         double delta = std::fabs(w - v) / std::fabs(h);
-        if(delta <= eps) {
+        if (delta <= eps) {
             x = x + h;
             y = v;
         }
-        h = h * Min(5, std::pow(0.9*(eps/delta),0.25)); 
+        h = h * Min(5, std::pow(0.9 * (eps / delta), 0.25));
     }
     return y;
 }
-
-int main () {
+double RungeKutta(double f(double, double, std::vector<double>), double x_0, std::vector<double> y_0, double x_max, double h) {
+    double x = x_0, y = y_0[0];
+    std::vector<double> u;
+    for (int i = 1; i < y_0.size(); i++) {
+        u.push_back(y_0[i]);
+    }
+    std::vector<std::vector<double>> K(4, std::vector<double>(y_0.size()));
+    while (x <= x_max){
+        for (int k = 0; k < y_0.size()-1; k++) {
+            K[0][k] = u[k];
+        }
+        K[0][y_0.size()-1] = f(x, y, u);
+        for (int k = 0; k < y_0.size() -1; k++) {
+            K[1][k] = u[k] + K[0][k+1]*h/2.;
+        }
+        K[1][y_0.size()-1] = f(x + h/2, y + h*K[0][0]/2, K[1]);
+        for (int k = 0; k < y_0.size()-1; k++) {
+            K[2][k] = u[k] + K[1][k + 1] * h / 2.;
+        }
+        K[2][y_0.size()-1] = f(x + h / 2, y + h * K[1][0] / 2, K[2]);
+        for (int k = 0; k < y_0.size()-1; k++) {
+            K[3][k] = u[k] + K[2][k + 1] * h / 2.;
+        }
+        K[3][y_0.size()-1] = f(x + h, y + h * K[2][0], K[3]);
+        y += h * (K[0][0] + 2*K[1][0] + 2*K[2][0] + K[3][0]) / 6;
+        for (int k = 0; k < y_0.size()-1; k++) {
+            u[k] += h * (K[0][k+1] + 2 * K[1][k+1] + 2 * K[2][k+1] + K[3][k+1]) / 6;
+        }
+        x += h;
+    }
+    return y;
+}
+double RungeKuttaStep(double f(double, double, std::vector<double>), double x, double y, std::vector<double> &u, std::vector<std::vector<double>>& K, double h) {
+    for (int k = 0; k < K[0].size() - 1; k++) {
+        K[1][k] = u[k] + K[0][k + 1] * h / 2.;
+    }
+    K[1][K[0].size() - 1] = f(x + h / 2, y + h * K[0][0] / 2, K[1]);
+    for (int k = 0; k < K[0].size() - 1; k++) {
+        K[2][k] = u[k] + K[1][k + 1] * h / 2.;
+    }
+    K[2][K[0].size() - 1] = f(x + h / 2, y + h * K[1][0] / 2, K[2]);
+    for (int k = 0; k < K[0].size() - 1; k++) {
+        K[3][k] = u[k] + K[2][k + 1] * h / 2.;
+    }
+    K[3][K[0].size() - 1] = f(x + h, y + h * K[2][0], K[3]);
+    y += h * (K[0][0] + 2 * K[1][0] + 2 * K[2][0] + K[3][0]) / 6;
+    for (int k = 0; k < K[0].size() - 1; k++) {
+        u[k] += h * (K[0][k + 1] + 2 * K[1][k + 1] + 2 * K[2][k + 1] + K[3][k + 1]) / 6;
+    }
+    return y;
+}
+double RungeKuttaAdaptivni(double f(double, double, std::vector<double>), double x_0, std::vector<double> y_0, double x_max, double h) {
+    double eps = 1e-5;
+    double x = x_0, y = y_0[0];
+    std::vector<double> u;
+    for (int i = 1; i < y_0.size(); i++) {
+        u.push_back(y_0[i]);
+    }
+    std::vector<std::vector<double>> K(4, std::vector<double>(y_0.size()));
+    while (x <= x_max) {
+        auto u1 = u;
+        double w = RungeKuttaStep(f, x, y, u, K, h); u = u1;
+        std::cout << w << std::endl;
+        double v = RungeKuttaStep(f, x, y, u, K, h/2);
+        double z = RungeKuttaStep(f, x + h / 2, v, u, K, h / 2);
+        double delta = std::fabs(w - z) / std::fabs(h);
+        if (delta <= eps) {
+            x += h;
+            y = z;
+        }
+        else { u = u1; }
+        h = h * Min(5, std::pow(0.9 * (eps / delta), 0.25));
+    }
+    return y;
+}
+int main() {
     double h;
     std::cout << "Unesite korak integracije: ";
     std::cin >> h;
     double x_max;
     std::cout << "Unesite vrijednost tacke u kojoj se racuna: ";
     std::cin >> x_max;
-    double x_0, y_0;
-    std::cout << "Unesite pocetne uslove (prvo x_0, zatim y_0): ";
-    std::cin >> x_0 >> y_0;
-    std::cout << "Rjesenje dif. jednacine prvog reda u tacki " << x_max << " je: " << AdaptacijaKoraka([](double x, double y){ return (y*y-x*x)/(y*y+x*x); }, x_0, y_0, x_max, h);
+    double x_0, y_0, y_0_1;
+    std::cout << "Unesite pocetne uslove (prvo x_0, zatim y_0 i y_0_1): ";
+    std::cin >> x_0 >> y_0 >> y_0_1;
+    //std::cout << "Rjesenje dif. jednacine prvog reda u tacki " << x_max << " je: " << AdaptacijaKoraka([](double x, double y) { return (y * y - x * x) / (y * y + x * x); }, x_0, y_0, x_max, h);
+    std::cout << "Rjesenje dif. jednacine drugog tog reda u tacki " << x_max << " je: " << RungeKuttaAdaptivni([](double x, double y, std::vector<double> yy) {return -y; }, x_0, {y_0, y_0_1}, x_max, h) << std::endl;
+    std::cout << "Rjesenje dif. jednacine drugog tog reda u tacki " << x_max << " je: " << RungeKutta([](double x, double y, std::vector<double> yy) {return -y; }, x_0, { y_0, y_0_1 }, x_max, h) << std::endl;
     return 0;
 }
