@@ -1,4 +1,4 @@
-# srees
+# Numerical ordinary differential equation solver based on Runge Kutta 4
 This is a numeric solver for higher oder ordinary differential equations based on Runge Kutta 4. Created for Uni Class
 ## Dependencies
 ### Pugixml
