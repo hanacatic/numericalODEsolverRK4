@@ -23,7 +23,7 @@ std::vector<double> PronadjiKoeficijente(std::string s) {
             pocetak = i;
             if (s.at(i - 1) == '-' || s.at(i - 2) == '-') predznak = true;
             i++;
-            while ((s.at(i) >= 0 && s.at(i) <= 9) || s.at(i) == '.') i++;
+            while ((s.at(i) >= '0' && s.at(i) <= '9') || s.at(i) == '.') i++;
             kraj = i;
             while (pocetak != (kraj + 1)) {
                 temp.push_back(s.at(pocetak));
