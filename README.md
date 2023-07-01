@@ -2,8 +2,10 @@
 This is a numeric solver for higher oder ordinary differential equations based on Runge Kutta 4. Created for Uni Class
 ## Dependencies
 ### Pugixml
+Installation should be done through VCPKG, following the standard procedure.
+
 ### Matplotlibcpp
-The code uses apart from standard C++ libraries matplotlib-cpp for graphic representations, which can be found on the following link.
+The code uses apart from standard C++ libraries and pugixml, matplotlib-cpp for graphic representations, which can be found on the following link.
 
 https://github.com/lava/matplotlib-cpp
 
