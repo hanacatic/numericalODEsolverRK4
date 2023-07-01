@@ -16,7 +16,7 @@ const double PI = 4 * atan(1);
 //Funkcija koja pretvara string u decimalni broj
 double Broj(std::string x) { return std::stod(x); }
 
-//Funkcija koja trazi koeficijente dif. jed. iz stringa
+// Funkcija koja trazi koeficijente dif. jed. iz stringa
 std::vector<double> PronadjiKoeficijente(std::string s) {
     std::vector<double> koeficijenti;
     for (int i = 0; i < s.size(); i++) {
@@ -27,7 +27,7 @@ std::vector<double> PronadjiKoeficijente(std::string s) {
             pocetak = i;
             if (s.at(i - 1) == '-' || s.at(i - 2) == '-') predznak = true;
             i++;
-            while ((s.at(i) >= 0 && s.at(i) <= 9) || s.at(i) == '.') i++;
+            while ((s.at(i) >= '0' && s.at(i) <= '9') || s.at(i) == '.') i++;
             kraj = i;
             while (pocetak != (kraj + 1)) {
                 temp.push_back(s.at(pocetak));
