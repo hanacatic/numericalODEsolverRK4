@@ -126,9 +126,9 @@ int ucitajXML(vector<double>& koeficijenti, vector<double>& pocetni_uslovi, doub
 //Funkcija koja vraca funkciju koja predstavlja diferencijalnu jednacinu na osnovu koeficijenata
 function <double(double, double, vector<double>)> f(vector<double> koeficijenti) {
     return [koeficijenti](double x, double y, vector<double> u) {
-        double result = koeficijenti[0] * x + koeficijenti[1] * y;
+        double result = koeficijenti[0] + koeficijenti[1] * x + koeficijenti[2] * y;
         for (int i = 0; i < u.size(); i++) {
-            result += koeficijenti[i + 2] * u[i];
+            result += koeficijenti[i + 3] * u[i];
         }
         return result;
     };
@@ -165,8 +165,8 @@ double AdaptacijaKoraka(double f(double, double), double x_0, double y_0, double
  //RungeKutta4 algoritam za rjesavanje diferencijalnih jednacina viseg reda
 double RungeKutta(function <double(double, double, vector<double>)> f, double x_0, std::vector<double> y_0, double x_max, double h) {
     double x = x_0, y = y_0[0];
-    vector<double> u, xx(x,1), yy(y,1);
-
+    vector<double> u, xx, yy;
+    xx.push_back(x); yy.push_back(y);
     for (int i = 1; i < y_0.size(); i++) {
         u.push_back(y_0[i]);
     }
@@ -197,9 +197,10 @@ double RungeKutta(function <double(double, double, vector<double>)> f, double x_
         x += h;
 
         //vizualizacija
+
         xx.push_back(x); yy.push_back(y);
         plot.update(xx, yy);
-        plt::pause(0.001);
+        plt::pause(0.01);
     }
     return y;
 }
@@ -212,8 +213,8 @@ int main(){
     pocetni_uslovi.erase(pocetni_uslovi.begin(), pocetni_uslovi.begin() + 1);
     std::vector<double> y0 = move(pocetni_uslovi);
     std::cout << "y0.size() = " << y0.size() << std::endl;
-    plt::named_plot("okvir", std::vector<double>{0, 0, x_max, x_max, 0}, std::vector<double>{-x_max, x_max, x_max, -x_max, -x_max}, "w-");
-    std::cout << RungeKutta(f(koeficijenti), x0, y0, x_max, 0.01);
+    plt::named_plot("okvir", std::vector<double>{0, 0, x_max, x_max, 0}, std::vector<double>{-10, 10, 10, -10, -10}, "w-");
+    std::cout << RungeKutta(f(koeficijenti), x0, y0, x_max, 0.001);
     plt::show();
     return 0;
 }
